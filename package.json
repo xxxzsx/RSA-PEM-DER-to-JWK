@@ -1,0 +1,22 @@
+{
+    "name": "rsa-pem-der-to-jwk",
+    "version": "1.0.0",
+    "description": "RSA PEM/DER keys converter to JWK.",
+    "main": "rsaPemDerToJwk.js",
+    "dependencies": {},
+    "devDependencies": {
+        "jest": "*"
+    },
+    "scripts": {
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/xxxzsx/RSA-PEM-DER-to-JWK.git"
+    },
+    "author": "xxxzsx <xxxzsx@netc.it>",
+    "bugs": {
+        "url": "https://github.com/xxxzsx/RSA-PEM-DER-to-JWK/issues"
+    },
+    "homepage": "https://github.com/xxxzsx/RSA-PEM-DER-to-JWK#readme"
+}
