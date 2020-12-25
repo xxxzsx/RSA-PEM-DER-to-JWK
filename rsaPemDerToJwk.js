@@ -38,121 +38,73 @@ function arrayBufferToHex(buffer) {
     return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-// URL-safe base64.
-function base64Url(base64) {
-    return base64
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=/g, '')
-}
-
-
-// PEM unpack.
-function rsaUnpack(pem) {
-    pem = pem.split("\n").map(s => s.trim())
-
-    // Check and remove RSA key header/footer.
-    let type = (/-----BEGIN RSA (PRIVATE|PUBLIC) KEY-----/.exec(pem.shift()) || [])[1]
-    if (!type || pem.pop() !== '-----END RSA ' + type + ' KEY-----')
-        throw Error('Headers not supported.')
-
-    const der = base64ToArrayBuffer(pem.join(''))
-    type = type.toLowerCase()
-
-    return derUnpack(der, type)
-}
-
-// DER unpack.
-function derUnpack(der, type = 'public') {
-    const buf = new Uint8Array(der)
-    const fields = {}
-
-    let offset = {
-        private : buf[1] & 0x80 ? buf[1] - 0x80 + 5 : 7,
-        public : buf[1] & 0x80 ? buf[1] - 0x80 + 2 : 2
-    }[type]
-
-    function read() {
-        let s = buf[offset + 1]
-
-        if (s & 0x80) {
-            var n = s - 0x80
-            s = new DataView(buf.buffer)[['getUint8', 'getUint16'][n - 1]](offset + 2)
-            offset += n
-        }
-
-        offset += 2
-
-        const b = buf.slice(offset, offset + s)
-        offset += s
-        return b
-    }
-
-    fields.modulus = read()
-    fields.bits = (fields.modulus.length - 1) * 8 + Math.ceil(Math.log2(fields.modulus[0] + 1))
-    fields.publicExponent = parseInt(arrayBufferToHex(read()), 16)
-
-    if (type === 'private') {
-        fields.privateExponent = read()
-        fields.prime1 = read()
-        fields.prime2 = read()
-        fields.exponent1 = read()
-        fields.exponent2 = read()
-        fields.coefficient = read()
-    }
-
-    for (const k of Object.keys(fields))
-        if (fields[k] instanceof Uint8Array)
-            fields[k] = base64Url(arrayBufferToBase64(fields[k]))
-
-    return fields
-}
-
 
 // PEM key to JWK.
 function rsaPemToJwk(pem, type = undefined, extraKeys) {
-    const key = rsaUnpack(pem)
-    return keyToJwk(key, type, extraKeys)
+    pem = pem.trim().split("\n").map(s => s.trim())
+
+    // Check and remove RSA key header/footer
+    let keyType = (/-----BEGIN RSA (PRIVATE|PUBLIC) KEY-----/.exec(pem.shift()) || [])[1]
+    if (!keyType || pem.pop() !== '-----END RSA ' + keyType + ' KEY-----')
+        throw Error('Headers not supported.')
+
+    // Check requested JWK and given PEM types
+    keyType = keyType.toLowerCase()
+    if (type && type !== keyType)
+        throw Error(`RSA type mismatch: requested ${type}, given ${keyType}.`)
+
+    const der = base64ToArrayBuffer(pem.join(''))
+    return rsaDerToJwk(der, keyType, extraKeys)
 }
 
 // DER key to JWK.
-function rsaDerToJwk(der, type = undefined, extraKeys) {
-    const key = derUnpack(der, type)
-    return keyToJwk(key, type, extraKeys)
-}
+function rsaDerToJwk(der, type, extraKeys) {
+    const buffer = new Uint8Array(der)
+    const fields = {}
 
-function keyToJwk(key, type = undefined, extraKeys) {
-    type = type || (key.privateExponent !== undefined ? 'private' : 'public')
+    let offset = {
+        private: buffer[1] & 0x80 ? buffer[1] - 0x80 + 5 : 7,
+        public: buffer[1] & 0x80 ? buffer[1] - 0x80 + 2 : 2
+    }[type]
 
-    // Requested JWK and given PEM does not match
-    if (type === 'private' && !key.privateExponent || type === 'public' && key.privateExponent)
-        throw Error(`RSA type mismatch: requested ${type}, given ${key.privateExponent ? 'private' : 'public'}.`)
+    // Read fields.
+    const read = () => {
+        let s = buffer[offset + 1]
 
-    // Make the public exponent into a buffer of minimal size
-    const expSize = Math.ceil(Math.log(key.publicExponent) / Math.log(256))
-    key.exp = new Uint8Array(expSize)
-    let v = key.publicExponent
+        if (s & 0x80) {
+            let n = s - 0x80
+            s = new DataView(buffer.buffer)[
+                ['getUint8', 'getUint16'][n - 1]
+            ](offset + 2)
 
-    for (let i = expSize - 1; i >= 0; i--) {
-        key.exp[i] = v % 256
-        v = Math.floor(v / 256)
+            offset += n
+        }
+        offset += 2
+
+        return buffer.slice(offset, offset += s)
     }
-    key.exp = base64Url(arrayBufferToBase64(key.exp))
+
+    // URL-safe base64.
+    const readBase64 = () =>
+        arrayBufferToBase64(read())
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '')
 
     return {
         kty: 'RSA',
         ...extraKeys,
         // The public part is always present
-        n: key.modulus,
-        e: key.exp,
-        // Add private part
+        n: readBase64(),      // modulus
+        e: readBase64(),      // public exponent
+        // Read private part
         ...type === 'private' && {
-            d: key.privateExponent,
-            p: key.prime1,
-            q: key.prime2,
-            dp: key.exponent1,
-            dq: key.exponent2,
-            qi: key.coefficient
+            d: readBase64(),  // private exponent
+            p: readBase64(),  // prime 1
+            q: readBase64(),  // prime 2
+            dp: readBase64(), // exponent 1
+            dq: readBase64(), // exponent 2
+            qi: readBase64()  // coefficient
         }
     }
 }
