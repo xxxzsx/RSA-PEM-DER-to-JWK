@@ -60,7 +60,6 @@ function rsaPemToJwk(pem, type = undefined, extraKeys) {
 // DER key to JWK.
 function rsaDerToJwk(der, type, extraKeys) {
     const buffer = new Uint8Array(der)
-    const fields = {}
 
     let offset = {
         private: buffer[1] & 0x80 ? buffer[1] - 0x80 + 5 : 7,
