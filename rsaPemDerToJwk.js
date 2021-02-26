@@ -44,8 +44,8 @@ function rsaPemToJwk(pem, type = undefined, extraKeys) {
     pem = pem.trim().split("\n").map(s => s.trim())
 
     // Check and remove RSA key header/footer
-    let keyType = (/-----BEGIN RSA (PRIVATE|PUBLIC) KEY-----/.exec(pem.shift()) || [])[1]
-    if (!keyType || pem.pop() !== '-----END RSA ' + keyType + ' KEY-----')
+    let keyType = (/-----BEGIN(?: RSA)? (PRIVATE|PUBLIC) KEY-----/.exec(pem.shift()) || [])[1]
+    if (!keyType || !RegExp(`-----END( RSA)? ${keyType} KEY-----`).exec(pem.pop()))
         throw Error('Headers not supported.')
 
     // Check requested JWK and given PEM types
