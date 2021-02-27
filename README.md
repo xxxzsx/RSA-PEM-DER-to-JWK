@@ -1,37 +1,37 @@
+![](https://travis-ci.com/xxxzsx/RSA-PEM-DER-to-JWK.svg?branch=master) ![](https://status.david-dm.org/gh/xxxzsx/RSA-PEM-DER-to-JWK.svg)
+
 # RSA PEM/DER to JWK
+
 RSA PEM/DER keys converter to JWK with no dependencies for both browser and Node.js.
 
 
-### Installation
+## Installation
 For Node.js run:
 ```
-npm i rsa-pem-der-to-jwk
+$ npm i rsa-pem-der-to-jwk
 ```
 
-### Usage
-Require:
+## Usage
 ```
+// Require
 const { rsaPemToJwk, base64ToHex } = require('rsa-pem-der-to-jwk')
-```
-Import:
-```
+
+// Import
 import { rsaDerToJwk, hexToArrayBuffer } from 'rsa-pem-der-to-jwk'
-```
-Browser:
-```
+
+// Browser
 <script type="text/javascript" src="https://raw.githubusercontent.com/xxxzsx/RSA-PEM-DER-to-JWK/master/rsaPemDerToJwk.js">
 ```
 
-
 You can store PEM key as a string/file or DER key as hex or base64 string in code and convert it to ArrayBuffer.
 
-#### rsaPemToJwk(pemKey, type = 'public' | 'private', extraKeys = {})
+#### rsaPemToJwk(pemKey: string, type = 'public' | 'private', extraKeys = {})
 Converts RSA PEM key to JWK.
 
-#### rsaDerToJwk(derKey, type = 'public' | 'private', extraKeys = {})
+#### rsaDerToJwk(derKey: ArrayBuffer, type = 'public' | 'private', extraKeys = {})
 Converts RSA DER key (ArrayBuffer) to JWK.
 
-### Additional functions
+## Additional functions
 
 #### base64ToHex(base64)
 Converts base64 string to hex string.
