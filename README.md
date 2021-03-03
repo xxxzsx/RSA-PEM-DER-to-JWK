@@ -1,4 +1,6 @@
-![](https://travis-ci.com/xxxzsx/RSA-PEM-DER-to-JWK.svg?branch=master) ![](https://status.david-dm.org/gh/xxxzsx/RSA-PEM-DER-to-JWK.svg)
+![](https://travis-ci.com/xxxzsx/RSA-PEM-DER-to-JWK.svg?branch=master)
+![](https://status.david-dm.org/gh/xxxzsx/RSA-PEM-DER-to-JWK.svg)
+[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6Inh4eHpzeCIsInJlcG8xIjoiUlNBLVBFTS1ERVItdG8tSldLIiwiaW5jbHVkZUxpbnQiOmZhbHNlLCJhdXRob3JJZCI6Mjc5NDIsImlhdCI6MTYxNDc0NDU2MX0.sW5IiBdsVVPT_w8g8G3k5P6x5auHXhRD86hs6h2DzAk)](https://www.deepcode.ai/app/gh/xxxzsx/RSA-PEM-DER-to-JWK/_/dashboard?utm_content=gh%2Fxxxzsx%2FRSA-PEM-DER-to-JWK)
 
 # RSA PEM/DER to JWK
 
