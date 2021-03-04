@@ -14,7 +14,7 @@ $ npm i rsa-pem-der-to-jwk
 ```
 
 ## Usage
-```
+```javascript
 // Require
 const { rsaPemToJwk, base64ToHex } = require('rsa-pem-der-to-jwk')
 
